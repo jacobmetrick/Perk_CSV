@@ -1,4 +1,5 @@
 import csv
+import datetime
 import dateutil.parser as dateparser
 import io
 from nameparser import HumanName
@@ -13,6 +14,8 @@ SURVEY_FORMAT = ["submission_date","surveyee_first_name","surveyee_last_name","s
 OUTPUT_FORMAT = ["Last name", "First name", "Email", "Group number", "Group members", "Paid amount", "Group amount",
         "Payees", "Verification status", "Phone", "Address"]
 AMOUNT_MATCHER = re.compile("Total: (\d+\.\d+)")
+DATE_CUTOFF = datetime.datetime(2019, 6, 30)
+INPUT_FILE_NAME = 'Tickets-2020.csv'
 
 NAME_HACKS = {"Bari Specter": "Bari Spector",
         "Liy Zoberman": "Lily Zoberman"}
@@ -109,7 +112,7 @@ with io.open('paypal.csv', 'r', encoding='utf-8') as payment_file:
 
 # Dedupe rows by name
 deduped_rows_by_name = {}
-with io.open('Tickets-2019.csv', 'r', encoding='utf-8') as survey_file:
+with io.open(INPUT_FILE_NAME, 'r', encoding='utf-8') as survey_file:
     survey_reader = csv.DictReader(survey_file, SURVEY_FORMAT)
     skipped_first_row = False
     for row in survey_reader:
@@ -119,7 +122,12 @@ with io.open('Tickets-2019.csv', 'r', encoding='utf-8') as survey_file:
 
         surveyee_name = get_name_from_row(row, "surveyee")
         existing_row = deduped_rows_by_name.pop(surveyee_name, None)
-        if existing_row and dateparser.parse(existing_row['submission_date']) > dateparser.parse(row['submission_date']):
+
+        row_submission_date = dateparser.parse(row['submission_date'])
+        if row_submission_date < DATE_CUTOFF:
+            continue
+
+        if existing_row and dateparser.parse(existing_row['submission_date']) > row_submission_date:
             surveyee_name = get_name_from_row(existing_row, "surveyee")
             deduped_rows_by_name[surveyee_name] = existing_row
         else:
