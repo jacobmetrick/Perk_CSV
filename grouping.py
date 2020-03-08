@@ -19,7 +19,10 @@ DATE_CUTOFF = datetime.datetime(2019, 6, 30)
 INPUT_FILE_NAME = 'Tickets-2020.csv'
 
 NAME_HACKS = {"Bari Specter": "Bari Spector",
-        "Liy Zoberman": "Lily Zoberman"}
+        "Liy Zoberman": "Lily Zoberman",
+        "Deb Bakal": "Debra Bakal",
+        "Deb Bakak": "Debra Bakal",
+        "Harriet Aaronsohn": "Harriet Aaronson"}
 
 class Payment:
     def __init__(self, payer, amount, verified = False, time = None):
